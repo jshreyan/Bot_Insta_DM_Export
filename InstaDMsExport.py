@@ -4,10 +4,10 @@ from datetime import timedelta
 import traceback
 import os
 
-MYUSERNAME = 'xyz_official'
+MYUSERNAME = 'shreyan_jadhavs'
 PERSONAL_CHAT = None#'abc_official'
-
 directory = 'instagram'
+
 chatmsg = ''
 chat = []
 participantstype = ''
@@ -20,7 +20,7 @@ def load_file():
         txt = f.read()
         messages_json = json.loads(txt)
     except:
-        print('Error opening file. Please check file path.')
+        print('Error opening messages file. Please check file path.')
 
     return messages_json
 
@@ -38,7 +38,8 @@ def json_to_pylist(messages_json):
                     participants = 'PARTICIPANTS: '+', '.join(messages_json[i]['participants'])
                     chat.append([participantstype,participants,[messages_json[i]['conversation']]])                
             except:
-                None
+                print('Error in json_to_pylist function1:'+participants)
+                #traceback.print_exc()
         else:
             try:
                 if len(messages_json[i]['participants'])>2:
@@ -46,16 +47,15 @@ def json_to_pylist(messages_json):
                 else:
                     try:
                         username = messages_json[i]['participants'].copy()
-                        username.remove('shreyan_jadhav')
-                        participantstype = username[0]#+'_'+str(i)       
+                        username.remove(MYUSERNAME)
+                        participantstype = username[0]#+'_'+str(i)
                     except:
                         participantstype = messages_json[i]['participants'][1]
                 
                 participants = 'PARTICIPANTS: '+', '.join(messages_json[i]['participants'])
                 chat.append([participantstype,participants,[messages_json[i]['conversation']]])
             except:
-                None
-                #print(messages_json[i]['participants'])
+                print('Error in json_to_pylist function2:'+participants)
                 #traceback.print_exc()
     return chat
 
@@ -63,8 +63,8 @@ def make_readable(chat):
     chat_data = []
     for perchat in reversed(chat):
         chatmsg = perchat[1]+'\n\n'
+        chatx = perchat[2][0]
         for x in range(0,len(perchat[2][0])):
-            chatx = perchat[2][0]
             j = len(chatx)-x-1
             chattext = ''
             try:
@@ -83,23 +83,23 @@ def make_readable(chat):
                 chatmsg =  chatmsg+'['+str(msgtime)+']'+' '+str(chatx[j]['sender'])+': '+str(chattext)+'\n'
                 #print(chatx[j]['created_at'],(chattext))
             except:
-                print(chatx[j])
-                traceback.print_exc()
-
-        chat_data.append([perchat[2][0], perchat[0], chatmsg])
+                print('Error in make_readable function:'+chatx[j])
+                #traceback.print_exc()
         export_to_file(perchat[2][0], perchat[0], chatmsg)
-    
 
-def export_to_file(chat_msg_lst, chat_name, chat_msg):                
+def export_to_file(chat_msg_lst, chat_name, chat_msg):
+    try:
         if len(chat_msg_lst) > 5:
             if not os.path.exists(directory):
                 os.makedirs(directory)
             f = open(directory+'\\'+chat_name+'.txt', "a+", encoding="utf8")
             f.write(chat_msg)
             f.close()
+    except:
+        print('Error in export_to_file function')
+        
           
 messages_json = load_file()
 chat_pylist = json_to_pylist(messages_json)
 make_readable(chat_pylist)
-#export_to_file(chat_msg_lst, chat_name, chat_msg)
 
